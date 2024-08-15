@@ -30,13 +30,3 @@ const factorial = function (n) {
   }
   return product;
 };
-
-module.exports = {
-  add,
-  subtract,
-  multiply,
-  divide,
-  power,
-  modulo,
-  factorial,
-};
