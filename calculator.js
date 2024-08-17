@@ -30,3 +30,21 @@ const factorial = function (n) {
   }
   return product;
 };
+
+const calculate = function(expression){
+  // Parse string into a numeric calculation
+  /* Use order of operations to find what to parse first
+      PEMDAS/BODMAS with ! being equivalent to an exponent */
+  // Let's go with the simplest case and build up: 1+1
+  // Interpret 1+1 as add(calculate(1), calculate(1)) ...Nuuuu dynamic programming!
+  // When we calculate() just a number, return that int
+  // When we calculate() an expression, return lowest priority operation
+  // Hopefully this isnt too bad of a soln lol
+  let num = Number.parseFloat(expression);
+  if(expression == num){
+    return num;
+  }
+  else{
+    console.log(expression);
+  }
+}
