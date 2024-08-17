@@ -7,9 +7,9 @@ const SYMBOLS = [
 ];
 const SIZE = SYMBOLS.length;
 
-document.addEventListener("DOMContentLoaded", () => {createCalc()}) // This event fires when page is done loading
+document.addEventListener("DOMContentLoaded", () => {createCalculator()}) // This event fires when page is done loading
 
-function createCalc(){
+function createCalculator(){
   const ui = document.querySelector("#ui");
   SYMBOLS.forEach((row) => {
     const rowContainer = document.createElement("div");
@@ -17,6 +17,7 @@ function createCalc(){
     createButtons(row, rowContainer);
     ui.appendChild(rowContainer);
   })
+  addEvents();
 }
 
 function createButtons(rowSymbols, container){
@@ -25,9 +26,35 @@ function createButtons(rowSymbols, container){
     button.classList.toggle("button");
     button.id = symbol;
     button.textContent = symbol;
-    button.addEventListener("click", () => {
-      console.log(button.textContent);
-    });
     container.appendChild(button);
+  });
+}
+
+function addEvents(){
+  const buttons = document.querySelectorAll(".button");
+  const inputDisplay = document.querySelector("#current-input"); // Arrow functions use parent scope
+  const prevDisplay = document.querySelector("#previous-input");
+  buttons.forEach((button) => {
+    switch (button.textContent){
+      // Clear display
+      case ('AC'):
+        button.addEventListener("click", () => {
+          inputDisplay.textContent = "";
+          prevDisplay.textContent = "";
+        });
+        break;
+      // Equals
+      case ('\u003d'):
+        button.addEventListener("click", () => {
+          prevDisplay.textContent = calculate(inputDisplay.textContent);
+        });
+        break;
+      // Every other button
+        default:
+        button.addEventListener("click", () => {
+          inputDisplay.textContent += button.textContent;
+        });
+        break;
+    }
   });
 }
