@@ -46,7 +46,8 @@ const calculate = function(expression){
   // Let's go with the simplest case and build up: 1+1
   // Interpret 1+1 as add(calculate(1), calculate(1)) ...Nuuuu dynamic programming!
   // Hopefully this isnt too bad of a soln lol
-  const OPERATOR_ORDER = ['-', '+' ,'\u00f7', '\u00d7'] // PEMDAS backwards
+  // const OPERATOR_ORDER = ['+', '-' ,'\u00f7', '\u00d7'] // PEMDAS backwards
+  const TESTING_OPERATOR_ORDER = ['+', '-' ,'/', '*']
     // When we calculate() just a number, return that int
   let num = Number.parseFloat(expression);
   if(expression == num){
@@ -56,7 +57,7 @@ const calculate = function(expression){
   else{
     let evalOperator;
     let operatorPosition; 
-    OPERATOR_ORDER.every((operator) => {
+    TESTING_OPERATOR_ORDER.every((operator) => {
       evalOperator = operator;
       operatorPosition = expression.indexOf(operator);
       return !(operatorPosition != -1);
@@ -65,10 +66,10 @@ const calculate = function(expression){
     let secondTerm = expression.slice(operatorPosition + 1, expression.length);
     // firstTerm = expression.replace(firstTerm, calculate(firstTerm));
     // secondTerm = expression.replace(secondTerm, calculate(secondTerm));
-    // console.log(expression);
-    // console.log(evalOperator);
-    // console.log(firstTerm);
-    // console.log(secondTerm);
+    console.log(expression);
+    console.log(evalOperator);
+    console.log(firstTerm);
+    console.log(secondTerm);
     switch(evalOperator){
       case '-':
         return subtract(
@@ -80,12 +81,12 @@ const calculate = function(expression){
           calculate(firstTerm), 
           calculate(secondTerm)
       );
-      case '\u00f7':
+      case '/':
         return divide(
           calculate(firstTerm), 
           calculate(secondTerm)
       );
-      case '\u00d7':
+      case '*':
         return multiply(
           calculate(firstTerm), 
           calculate(secondTerm)
