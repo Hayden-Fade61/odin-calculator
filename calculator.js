@@ -35,6 +35,10 @@ const factorial = function (n) {
   return product;
 };
 
+function parseInput(){
+
+}
+
 const calculate = function(expression){
   // Parse string into a numeric calculation
   /* Use order of operations to find what to parse first
@@ -61,10 +65,10 @@ const calculate = function(expression){
     let secondTerm = expression.slice(operatorPosition + 1, expression.length);
     // firstTerm = expression.replace(firstTerm, calculate(firstTerm));
     // secondTerm = expression.replace(secondTerm, calculate(secondTerm));
-    console.log(expression);
-    console.log(evalOperator);
-    console.log(firstTerm);
-    console.log(secondTerm);
+    // console.log(expression);
+    // console.log(evalOperator);
+    // console.log(firstTerm);
+    // console.log(secondTerm);
     switch(evalOperator){
       case '-':
         return subtract(
@@ -90,4 +94,8 @@ const calculate = function(expression){
         break;
     }
   }
+}
+
+module.exports  = {
+  calculate
 }
