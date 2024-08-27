@@ -53,7 +53,7 @@ function addEvents(){
       // Every other button
         default:
         button.addEventListener("click", () => {
-          inputDisplay.textContent += button.textContent + " ";
+          inputDisplay.textContent += button.textContent;
         });
         break;
     }
