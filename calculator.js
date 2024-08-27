@@ -1,3 +1,107 @@
+const SYMBOLS = [
+  ['(',')','%','AC'],
+  [ '7', '8', '9', '\u00f7'], 
+  [ '4', '5', '6', '\u00d7'], 
+  [ '1', '2', '3', '\u002d'], 
+  ['0', '.', '\u003d', '\u002b']
+];
+const SIZE = SYMBOLS.length;
+
+document.addEventListener("DOMContentLoaded", () => {createCalculator()}) // This event fires when page is done loading
+
+function createCalculator(){
+  const ui = document.querySelector("#ui");
+  SYMBOLS.forEach((row) => {
+    const rowContainer = document.createElement("div");
+    rowContainer.classList.toggle("button-row");
+    createButtons(row, rowContainer);
+    ui.appendChild(rowContainer);
+  })
+  addEvents();
+}
+
+function createButtons(rowSymbols, container){
+  rowSymbols.forEach((symbol) => {
+    const button = document.createElement("button");
+    button.classList.toggle("button");
+    button.id = symbol;
+    button.textContent = symbol;
+    container.appendChild(button);
+  });
+}
+
+function addEvents(){
+  const buttons = document.querySelectorAll(".button");
+  const inputDisplay = document.querySelector("#current-input"); // Arrow functions use parent scope
+  const prevDisplay = document.querySelector("#previous-input");
+  buttons.forEach((button) => {
+    switch (button.textContent){
+      // Clear display
+      case ('AC'):
+        button.addEventListener("click", () => {
+          inputDisplay.textContent = "";
+          prevDisplay.textContent = "";
+        });
+        break;
+      // Equals
+      case ('\u003d'):
+        button.addEventListener("click", () => {
+          prevDisplay.textContent = inputDisplay.textContent;
+          inputDisplay.textContent = parseInput(inputDisplay.textContent);
+        });
+        break;
+      // Every other button
+        default:
+        button.addEventListener("click", () => {
+          inputDisplay.textContent += button.textContent;
+        });
+        break;
+    }
+  });
+}
+
+/* Input parsing for calculator handled here */
+
+function parseInput(expression){
+  if (expression == "") return "";
+  // Format and check input
+  expression = expression.replaceAll(/\s/g, "");
+  expression = expression.replaceAll('\u00f7', '/');
+  expression = expression.replaceAll('\u00d7', '*');
+  let inputValid = checkInput(expression);
+  if (inputValid != "Valid") return inputValid;
+  // Reverse final string for left to right rule
+  return evaluate(expression.split(/(?=[+-/*%]) | (?<=[+-/*%])/g).reverse().join('')); // Lookarounds are goated
+}
+
+function checkInput(expression) {
+try {
+const ILLEGAL_CHARACTERS = /[^\d\(\)+\-*/.%]/
+const IMPROPER_OPERATOR_USE = /([/*]{2,})|(^[/*%])|([+\-*/.%]$)|([+-][*/])/ 
+if (ILLEGAL_CHARACTERS.test(expression)) throw "Syntax Error";
+if (IMPROPER_OPERATOR_USE.test(expression)) throw "Syntax Error";
+if (!validParentheses(expression)) throw "Syntax Error";
+return "Valid";
+}
+catch (error) {
+  return error;
+}
+}
+
+function validParentheses(expression){
+let stack = [];
+for(let i = 0; i < expression.length; i++){
+  if (expression[i] == '(') {
+    stack.unshift('(');
+  }
+  else if (expression[i] == ')' && stack.shift() == undefined){
+    return false;
+  }
+}
+return stack.length == 0;
+}
+
+
 const add = function (a, b) {
   return a + b;
 };
@@ -11,7 +115,7 @@ const multiply = function (a, b) {
 };
 
 const divide  = function (a, b) {
-  if (a <= 0 || b <= 0) return "Math Error";
+  if (a < 0 || b == 0) return "Math Error";
   return a / b;
 }
 
@@ -36,7 +140,7 @@ const evaluate = function(expression){
   /* Parse string into a numeric calculation
   * Use order of operations to find what to parse first PEMDAS/BODMAS 
   */
-  if (expression == "Math Error") return expression;
+  if (expression.includes("Math Error")) return "Math Error";
   const OPERATOR_ORDER = ['%', '+', '-' ,'/', '*'];
     // When we evaluate a number, return that int
   let num = Number.parseFloat(expression);
@@ -49,11 +153,12 @@ const evaluate = function(expression){
     let operatorPosition; 
     OPERATOR_ORDER.every((operator) => {
       evalOperator = operator;
-      operatorPosition = expression.indexOf(operator);
+      operatorPosition = expression.lastIndexOf(operator);
       return !(operatorPosition != -1);
     });
     let firstTerm = expression.slice(0, operatorPosition);
     let secondTerm = expression.slice(operatorPosition + 1, expression.length);
+    let identity = evalOperator == '-' ? "0" : "1";
     switch(evalOperator){
       case '-':
         return subtract(
@@ -84,4 +189,8 @@ const evaluate = function(expression){
         break;
     }
   }
+}
+
+function evaluate2(expression){
+  
 }
