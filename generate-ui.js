@@ -46,13 +46,14 @@ function addEvents(){
       // Equals
       case ('\u003d'):
         button.addEventListener("click", () => {
-          prevDisplay.textContent = calculate(inputDisplay.textContent);
+          prevDisplay.textContent = inputDisplay.textContent;
+          inputDisplay.textContent = parseInput(inputDisplay.textContent);
         });
         break;
       // Every other button
         default:
         button.addEventListener("click", () => {
-          inputDisplay.textContent += button.textContent;
+          inputDisplay.textContent += button.textContent + " ";
         });
         break;
     }
