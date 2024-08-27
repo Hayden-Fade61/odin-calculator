@@ -1,15 +1,14 @@
 /* Input parsing for calculator handled here */
 
 function parseInput(expression){
-  // Clean off whitespace
-  // Throw error 2 if any illegal characters
-  // Reverse final string for left to right rule
     if (expression == "") return "";
+    // Format and check input
     expression = expression.replaceAll(/\s/g, "");
     expression = expression.replaceAll('\u00f7', '/');
     expression = expression.replaceAll('\u00d7', '*');
     let inputValid = checkInput(expression);
     if (inputValid != "Valid") return inputValid;
+    // Reverse final string for left to right rule
     return evaluate(expression.split(/(?=[+-/*%]) | (?<=[+-/*%])/g).reverse().join('')); // Lookarounds are goated
 }
 
@@ -34,7 +33,7 @@ function validParentheses(expression){
       stack.unshift('(');
     }
     else if (expression[i] == ')' && stack.shift() == undefined){
-      return false
+      return false;
     }
   }
   return stack.length == 0;
