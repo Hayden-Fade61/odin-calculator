@@ -71,13 +71,17 @@ function parseInput(expression){
   let inputValid = checkInput(expression);
   if (inputValid != "Valid") return inputValid;
   // Reverse final string for left to right rule
-  return evaluate(expression.split(/(?=[+-/*%]) | (?<=[+-/*%])/g).reverse().join('')); // Lookarounds are goated
+  let parsedExpression = expression.split(/([+-/*%])/g);
+  parsedExpression = formatDecimals(parsedExpression);
+  parsedExpression = formatMinuses(parsedExpression);
+  return operate(parsedExpression); // Lookarounds are goated
 }
 
 function checkInput(expression) {
 try {
-const ILLEGAL_CHARACTERS = /[^\d\(\)+\-*/.%]/
-const IMPROPER_OPERATOR_USE = /([/*]{2,})|(^[/*%])|([+\-*/.%]$)|([+-][*/])/ 
+const ILLEGAL_CHARACTERS = /[^\d\(\)+\-*/.%]/;
+const IMPROPER_OPERATOR_USE = /([/*]{2,})|(^[/*%])|([+\-*/.%]$)|([+-][*/])/;
+if(!/\d/.test(expression)) throw "Syntax Error";
 if (ILLEGAL_CHARACTERS.test(expression)) throw "Syntax Error";
 if (IMPROPER_OPERATOR_USE.test(expression)) throw "Syntax Error";
 if (!validParentheses(expression)) throw "Syntax Error";
@@ -101,40 +105,13 @@ for(let i = 0; i < expression.length; i++){
 return stack.length == 0;
 }
 
+function formatDecimals(expression){} // Implement me!
 
-const add = function (a, b) {
-  return a + b;
-};
+function formatMinuses(expression){} // Implement me!
 
-const subtract = function (a, b) {
-  return a - b;
-};
-
-const multiply = function (a, b) {
-  return a* b;
-};
-
-const divide  = function (a, b) {
-  if (a < 0 || b == 0) return "Math Error";
-  return a / b;
+function operate(expression){
+  console.log(expression);
 }
-
-const power = function (a, b) {
-  return Math.pow(a, b);
-};
-
-const modulo = function (a, b){
-  return a % b;
-}
-
-const factorial = function (n) {
-  if (n === 0) return 1;
-  let product = 1;
-  for (let i = n; i > 0; i--) {
-    product *= i;
-  }
-  return product;
-};
 
 const evaluate = function(expression){
   /* Parse string into a numeric calculation
@@ -191,6 +168,36 @@ const evaluate = function(expression){
   }
 }
 
-function evaluate2(expression){
-  
+const add = function (a, b) {
+  return a + b;
+};
+
+const subtract = function (a, b) {
+  return a - b;
+};
+
+const multiply = function (a, b) {
+  return a* b;
+};
+
+const divide  = function (a, b) {
+  if (a < 0 || b == 0) return "Math Error";
+  return a / b;
 }
+
+const power = function (a, b) {
+  return Math.pow(a, b);
+};
+
+const modulo = function (a, b){
+  return a % b;
+}
+
+const factorial = function (n) {
+  if (n === 0) return 1;
+  let product = 1;
+  for (let i = n; i > 0; i--) {
+    product *= i;
+  }
+  return product;
+};
