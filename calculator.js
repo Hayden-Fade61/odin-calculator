@@ -73,7 +73,7 @@ function parseInput(expression){
   // Reverse final string for left to right rule
   let parsedExpression = expression.split(/([+-/*%])/g);
   parsedExpression = formatDecimals(parsedExpression);
-  parsedExpression = formatMinuses(parsedExpression);
+  // parsedExpression = formatNegatives(parsedExpression);
   return operate(parsedExpression); // Lookarounds are goated
 }
 
@@ -105,9 +105,40 @@ for(let i = 0; i < expression.length; i++){
 return stack.length == 0;
 }
 
-function formatDecimals(expression){} // Implement me!
-
-function formatMinuses(expression){} // Implement me!
+function formatDecimals(expression){
+  for(let i=0; i<expression.length; i++){
+    if(expression[i] == '.'){
+      let whole = "";
+      let fraction = "";
+      let isNotArrayStart = i - 1 >= 0;
+      let newNumPosition = isNotArrayStart ? i - 1 : i;
+      if (isNotArrayStart && !isNaN(expression[i-1])){
+        whole = expression[i-1];
+      }
+      if (i + 1 <= expression.length && !isNaN(expression[i+1])){
+        fraction =  expression[i+1];
+      }
+      let newNum = whole + '.' + fraction;
+      expression.splice(newNumPosition, 3, newNum);
+    }
+  }
+  return expression;
+} 
+ // Implement me!
+function formatNegatives(expression){
+  for(let i=0; i<expression.length; i++){
+    if(expression[i] == '-'){
+      if (i - 1 >= 0 && isNaN(expression[i-1])){
+        whole = expression[i-1];
+      }
+      if (i + 1 <= expression.length && !isNaN(expression[i+1])){
+        fraction =  expression[i+1];
+      }
+      let newNum = whole + '.' + fraction;
+      expression.splice(i-1, 3, newNum);
+    }
+  }
+}
 
 function operate(expression){
   console.log(expression);
