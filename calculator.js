@@ -73,8 +73,10 @@ function parseInput(expression){
   // Reverse final string for left to right rule
   let parsedExpression = expression.split(/([+-/*%])/g);
   parsedExpression = formatDecimals(parsedExpression);
-  // parsedExpression = formatNegatives(parsedExpression);
-  return operate(parsedExpression); // Lookarounds are goated
+  if (parsedExpression = "Syntax Error") return parsedExpression;
+  parsedExpression = formatNegatives(parsedExpression);
+  if (parsedExpression = "Syntax Error") return parsedExpression;
+  return operate(parsedExpression);
 }
 
 function checkInput(expression) {
@@ -111,15 +113,24 @@ function formatDecimals(expression){
       let whole = "";
       let fraction = "";
       let isNotArrayStart = i - 1 >= 0;
-      let newNumPosition = isNotArrayStart ? i - 1 : i;
+      let partsCount = 1;
+      let newNumPosition = i;
       if (isNotArrayStart && !isNaN(expression[i-1])){
         whole = expression[i-1];
+        partsCount++;
+        newNumPosition = i-1;
       }
-      if (i + 1 <= expression.length && !isNaN(expression[i+1])){
+      if (i+1 <= expression.length && !isNaN(expression[i+1])){
         fraction =  expression[i+1];
+        partsCount++;
+        console.log(fraction);
       }
       let newNum = whole + '.' + fraction;
-      expression.splice(newNumPosition, 3, newNum);
+      console.log(newNumPosition);
+      if (newNum != '.') expression.splice(newNumPosition, partsCount, newNum);
+      else return "Syntax Error";
+      console.log(expression);
+      i = newNumPosition;
     }
   }
   return expression;
