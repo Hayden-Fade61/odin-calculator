@@ -1,3 +1,5 @@
+.gitignore
 package.json
 package-lock.json
 TODO
+Model.txt
