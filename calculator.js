@@ -1,11 +1,14 @@
+const DIVIDE = '\u00f7';
+const MULTIPLY = '\u00d7';
 const SYMBOLS = [
   ['(',')','%','AC'],
-  [ '7', '8', '9', '\u00f7'], 
-  [ '4', '5', '6', '\u00d7'], 
-  [ '1', '2', '3', '\u002d'], 
-  ['0', '.', '\u003d', '\u002b']
+  [ '7', '8', '9', DIVIDE], 
+  [ '4', '5', '6', MULTIPLY], 
+  [ '1', '2', '3', '-'], 
+  ['0', '.', '=', '+']
 ];
 const SIZE = SYMBOLS.length;
+const OPERATORS = /[-+*\/]/;
 
 document.addEventListener("DOMContentLoaded", () => {createCalculator()}) // This event fires when page is done loading
 
@@ -44,10 +47,10 @@ function addEvents(){
         });
         break;
       // Equals
-      case ('\u003d'):
+      case ('='):
         button.addEventListener("click", () => {
           prevDisplay.textContent = inputDisplay.textContent;
-          inputDisplay.textContent = parseInput(inputDisplay.textContent);
+          inputDisplay.textContent = calculate(inputDisplay.textContent);
         });
         break;
       // Every other button
@@ -62,21 +65,68 @@ function addEvents(){
 
 /* Input parsing for calculator handled here */
 
-function parseInput(expression){
+function calculate(expression){
   if (expression == "") return "";
   // Format and check input
+  expression = replaceSymbols(expression);
+  let inputValid = checkInput(expression);
+  if (inputValid != "Valid") return inputValid;
+  expression = parseExpression(expression); // Finish this
+  let result = evaluate(expression); // Implement this
+  display(result); // Implement this
+}
+
+function parseExpression(expression){
+  console.log(`Parser for ${expression}`);
+  // Parsing
+  let parsedExpression = [];
+  let i = 0;
+  for (i; i < expression.length; i++){
+    // If operator after string start, read the number before the operator
+    if (OPERATORS.test((expression[i]))){
+      parsedExpression.push(expression[i]);
+      // Parse inner expression if ( is next
+      if (expression[i+1] == '(') continue;
+      // Otherwise, attempt to read  a number
+      else{
+        readNum = readNumber(expression, i+1);
+        parsedExpression.push(readNum[0]);
+        i = readNum[1];
+        console.log(expression[i]);
+      }
+    }
+    // If we encounter an opening bracket, parse expression within brackets
+    else if (expression[i] == '('){
+      let j = i+1;
+      let count = 1;
+      for (j; j<expression.length; j++){
+        if (expression[j] == '(') count++;
+        else if (expression[j] == ')') count--;
+        if (count == 0) break;
+      }
+      let innerExpression = parseExpression(expression.slice(i+1, j));
+      parsedExpression.push(innerExpression);
+      i = j;
+    }
+  }
+  return parsedExpression;
+}
+
+function readNumber(string, startIndex){
+  let result = []
+  let end = /[\-+]/.test(string[startIndex]) ? startIndex+1: startIndex;
+  const NUM_SYMBOLS = /[.\d]/; 
+  while(end < string.length && NUM_SYMBOLS.test(string[end])) end++;
+  result.push(Number.parseFloat(string.slice(startIndex, end)));
+  result.push(end - 1); // Last char in this number
+  return result;
+}
+
+function replaceSymbols(expression){
   expression = expression.replaceAll(/\s/g, "");
   expression = expression.replaceAll('\u00f7', '/');
   expression = expression.replaceAll('\u00d7', '*');
-  let inputValid = checkInput(expression);
-  if (inputValid != "Valid") return inputValid;
-  // Reverse final string for left to right rule
-  let parsedExpression = expression.split(/([+-/*%])/g);
-  parsedExpression = formatDecimals(parsedExpression);
-  if (parsedExpression = "Syntax Error") return parsedExpression;
-  parsedExpression = formatNegatives(parsedExpression);
-  if (parsedExpression = "Syntax Error") return parsedExpression;
-  return operate(parsedExpression);
+  return expression;
 }
 
 function checkInput(expression) {
@@ -107,107 +157,8 @@ for(let i = 0; i < expression.length; i++){
 return stack.length == 0;
 }
 
-function formatDecimals(expression){
-  for(let i=0; i<expression.length; i++){
-    if(expression[i] == '.'){
-      let whole = "";
-      let fraction = "";
-      let isNotArrayStart = i - 1 >= 0;
-      let partsCount = 1;
-      let newNumPosition = i;
-      if (isNotArrayStart && !isNaN(expression[i-1])){
-        whole = expression[i-1];
-        partsCount++;
-        newNumPosition = i-1;
-      }
-      if (i+1 <= expression.length && !isNaN(expression[i+1])){
-        fraction =  expression[i+1];
-        partsCount++;
-        console.log(fraction);
-      }
-      let newNum = whole + '.' + fraction;
-      console.log(newNumPosition);
-      if (newNum != '.') expression.splice(newNumPosition, partsCount, newNum);
-      else return "Syntax Error";
-      console.log(expression);
-      i = newNumPosition;
-    }
-  }
-  return expression;
-} 
- // Implement me!
-function formatNegatives(expression){
-  for(let i=0; i<expression.length; i++){
-    if(expression[i] == '-'){
-      if (i - 1 >= 0 && isNaN(expression[i-1])){
-        whole = expression[i-1];
-      }
-      if (i + 1 <= expression.length && !isNaN(expression[i+1])){
-        fraction =  expression[i+1];
-      }
-      let newNum = whole + '.' + fraction;
-      expression.splice(i-1, 3, newNum);
-    }
-  }
-}
-
-function operate(expression){
-  console.log(expression);
-}
-
-const evaluate = function(expression){
-  /* Parse string into a numeric calculation
-  * Use order of operations to find what to parse first PEMDAS/BODMAS 
-  */
-  if (expression.includes("Math Error")) return "Math Error";
-  const OPERATOR_ORDER = ['%', '+', '-' ,'/', '*'];
-    // When we evaluate a number, return that int
-  let num = Number.parseFloat(expression);
-  if(expression == num){
-    return num;
-  }
-  // When we evaluate an expression, return lowest priority operation
-  else{
-    let evalOperator;
-    let operatorPosition; 
-    OPERATOR_ORDER.every((operator) => {
-      evalOperator = operator;
-      operatorPosition = expression.lastIndexOf(operator);
-      return !(operatorPosition != -1);
-    });
-    let firstTerm = expression.slice(0, operatorPosition);
-    let secondTerm = expression.slice(operatorPosition + 1, expression.length);
-    let identity = evalOperator == '-' ? "0" : "1";
-    switch(evalOperator){
-      case '-':
-        return subtract(
-          evaluate(firstTerm), 
-          evaluate(secondTerm)
-      );
-      case '+':
-        return add(
-          evaluate(firstTerm), 
-          evaluate(secondTerm)
-      );
-      case '/':
-        return divide(
-          evaluate(firstTerm), 
-          evaluate(secondTerm)
-      );
-      case '*':
-        return multiply(
-          evaluate(firstTerm), 
-          evaluate(secondTerm)
-      );
-      case '%':
-        return modulo(
-          evaluate(firstTerm), 
-          evaluate(secondTerm)
-      );
-      default:
-        break;
-    }
-  }
+function operate(operator, a, b){
+  console.log([...arguments]);
 }
 
 const add = function (a, b) {
