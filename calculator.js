@@ -71,17 +71,26 @@ function calculate(expression){
   expression = replaceSymbols(expression);
   let inputValid = checkInput(expression);
   if (inputValid != "Valid") return inputValid;
-  expression = parseExpression(expression); // Finish this
+  expression = parseExpression(expression);
   let result = evaluate(expression); // Implement this
   display(result); // Implement this
 }
 
+/* TODO 
+  * Parse the first number in the expression */
+
 function parseExpression(expression){
   console.log(`Parser for ${expression}`);
   // Parsing
+  if (expression[0] == '(') {
+    expression = stripOuterBrackets(expression);
+  }
   let parsedExpression = [];
-  let i = 0;
+  let readNum = readNumber(expression, 0); // First number
+  parsedExpression.push(readNum[0]);
+  let i = readNum[1];
   for (i; i < expression.length; i++){
+    console.log(expression[i]);
     // If operator after string start, read the number before the operator
     if (OPERATORS.test((expression[i]))){
       parsedExpression.push(expression[i]);
@@ -92,7 +101,6 @@ function parseExpression(expression){
         readNum = readNumber(expression, i+1);
         parsedExpression.push(readNum[0]);
         i = readNum[1];
-        console.log(expression[i]);
       }
     }
     // If we encounter an opening bracket, parse expression within brackets
@@ -110,6 +118,19 @@ function parseExpression(expression){
     }
   }
   return parsedExpression;
+}
+
+function stripOuterBrackets(expr){
+  exprArr = [...expr];
+  let j;
+  console.log(exprArr);
+  console.log(j);
+  while(expr[0] == '(' && expr[exprArr.length - 1] == ')'){
+    exprArr.splice(0, 1);
+    exprArr.splice(exprArr.length - 1, 1);
+    console.log(exprArr);
+  }
+  return exprArr.join('');
 }
 
 function readNumber(string, startIndex){
