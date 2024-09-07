@@ -8,7 +8,9 @@ const SYMBOLS = [
   ['0', '.', '=', '+']
 ];
 const SIZE = SYMBOLS.length;
-const OPERATORS = /[-+*\/]/;
+const OPERATORS = /[-+*\/%]/;
+let previous;
+let answer; 
 
 document.addEventListener("DOMContentLoaded", () => {createCalculator()}) // This event fires when page is done loading
 
@@ -35,35 +37,42 @@ function createButtons(rowSymbols, container){
 
 function addEvents(){
   const buttons = document.querySelectorAll(".button");
-  const inputDisplay = document.querySelector("#current-input"); // Arrow functions use parent scope
-  const prevDisplay = document.querySelector("#previous-input");
   buttons.forEach((button) => {
     switch (button.textContent){
       // Clear display
       case ('AC'):
         button.addEventListener("click", () => {
-          inputDisplay.textContent = "";
-          prevDisplay.textContent = "";
+          displays = document.querySelectorAll(".display");
+          displays.forEach((display) => {
+            display.textContent = "";
+          });
         });
+        // Figure out how to make a mutation observer make this a CE button
         break;
       // Equals
       case ('='):
         button.addEventListener("click", () => {
-          prevDisplay.textContent = inputDisplay.textContent;
-          inputDisplay.textContent = calculate(inputDisplay.textContent);
+          input = document.querySelector("#current-input");
+          previous = answer;
+          answer = calculate(input.textContent); 
+          display(answer);
         });
         break;
       // Every other button
         default:
         button.addEventListener("click", () => {
-          inputDisplay.textContent += button.textContent;
+          display(button.textContent);
         });
         break;
     }
   });
 }
 
-/* Input parsing for calculator handled here */
+function display(text){
+  const inputDisplay = document.querySelector("#current-input");
+  const prevDisplay = document.querySelector("#previous-input");
+  inputDisplay.textContent += text;
+}
 
 function calculate(expression){
   if (expression == "") return "";
@@ -72,13 +81,10 @@ function calculate(expression){
   let inputValid = checkInput(expression);
   if (inputValid != "Valid") return inputValid;
   expression = parseExpression(expression);
-  let result = evaluate(expression); // Implement this
-  display(result); // Implement this
+  return evaluate(expression); // Implement this
 }
 
-/* TODO 
-  * Parse the first number in the expression */
-
+/* Input parsing for calculator handled here */
 function parseExpression(expression){
   console.log(`Parser for ${expression}`);
   // Parsing
@@ -87,10 +93,16 @@ function parseExpression(expression){
   }
   let parsedExpression = [];
   let readNum = readNumber(expression, 0); // First number
-  parsedExpression.push(readNum[0]);
-  let i = readNum[1];
+  let i;
+  if (isNaN(readNum[0])){
+    i = 0;
+    parsedExpression.push(0);
+  }
+  else{
+    parsedExpression.push(readNum[0]);
+    i = readNum[1];
+  }
   for (i; i < expression.length; i++){
-    console.log(expression[i]);
     // If operator after string start, read the number before the operator
     if (OPERATORS.test((expression[i]))){
       parsedExpression.push(expression[i]);
@@ -153,7 +165,7 @@ function replaceSymbols(expression){
 function checkInput(expression) {
 try {
 const ILLEGAL_CHARACTERS = /[^\d\(\)+\-*/.%]/;
-const IMPROPER_OPERATOR_USE = /([/*]{2,})|(^[/*%])|([+\-*/.%]$)|([+-][*/])/;
+const IMPROPER_OPERATOR_USE = /([%/*]{2,})|(^[/*%])|([+\-*/.%]$)|([+-][*/])/;
 if(!/\d/.test(expression)) throw "Syntax Error";
 if (ILLEGAL_CHARACTERS.test(expression)) throw "Syntax Error";
 if (IMPROPER_OPERATOR_USE.test(expression)) throw "Syntax Error";
@@ -177,9 +189,47 @@ for(let i = 0; i < expression.length; i++){
 }
 return stack.length == 0;
 }
+function evaluate(expr){
+  const OPERATOR_ORDER = ['*', '/', '%', '+', '-'];
+  let i;
+  let result;
+  console.log(expr);
+  OPERATOR_ORDER.forEach((operator) => {
+    // Collapse array into final result
+    for (i = 0; i < expr.length; i++){
+      if (expr[i] == operator){
+        if (Array.isArray(expr[i-1])){
+          expr[i-1] = evaluate(expr[i-1]);
+          if (expr[i-1] == "Math Error") return "Math Error";
+        }
+        if (Array.isArray(expr[i+1])){
+          expr[i+1] = evaluate(expr[i+1]);
+          if (expr[i+1] == "Math Error") return "Math Error";
+        }
+        result = operate(expr[i], expr[i-1], expr[i+1]);
+        expr[--i] = result;
+        expr.splice(i+1, 2);
+      }
+    }
+  });
+  return expr.length == 1 ? expr[0] : "Math Error";
+}
 
 function operate(operator, a, b){
-  console.log([...arguments]);
+  switch (operator){
+    case ('*'):
+      return multiply(a, b);
+    case ('/'):
+      return divide(a, b);
+    case ('%'):
+      return modulo(a, b);
+    case ('+'):
+      return add(a, b);
+    case ('-'):
+      return subtract(a, b);
+    default:
+      return "Math Error";
+  }    
 }
 
 const add = function (a, b) {

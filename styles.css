@@ -20,7 +20,7 @@ body {
     background-color: darkgray;
 }
 
-#output-display {
+#output {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
