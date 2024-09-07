@@ -1,3 +1,4 @@
+/* Global variables and constants */
 const DIVIDE = '\u00f7';
 const MULTIPLY = '\u00d7';
 const SYMBOLS = [
@@ -12,8 +13,10 @@ const OPERATORS = /[-+*\/%]/;
 let previous;
 let answer; 
 
+/* Calculator UI script */
 document.addEventListener("DOMContentLoaded", () => {createCalculator()}) // This event fires when page is done loading
 
+// UI creation controller
 function createCalculator(){
   const ui = document.querySelector("#ui");
   SYMBOLS.forEach((row) => {
@@ -25,6 +28,7 @@ function createCalculator(){
   addEvents();
 }
 
+// Create the calculator buttons
 function createButtons(rowSymbols, container){
   rowSymbols.forEach((symbol) => {
     const button = document.createElement("button");
@@ -35,6 +39,7 @@ function createButtons(rowSymbols, container){
   });
 }
 
+// Give the buttons their functionality
 function addEvents(){
   const buttons = document.querySelectorAll(".button");
   buttons.forEach((button) => {
@@ -68,23 +73,15 @@ function addEvents(){
   });
 }
 
+// Show a string on the output display 
 function display(text){
   const inputDisplay = document.querySelector("#current-input");
   const prevDisplay = document.querySelector("#previous-input");
   inputDisplay.textContent += text;
 }
 
-function calculate(expression){
-  if (expression == "") return "";
-  // Format and check input
-  expression = replaceSymbols(expression);
-  let inputValid = checkInput(expression);
-  if (inputValid != "Valid") return inputValid;
-  expression = parseExpression(expression);
-  return evaluate(expression); // Implement this
-}
-
 /* Input parsing for calculator handled here */
+// LR1 inspired parser for the expression strings
 function parseExpression(expression){
   console.log(`Parser for ${expression}`);
   // Parsing
@@ -102,7 +99,7 @@ function parseExpression(expression){
     parsedExpression.push(readNum[0]);
     i = readNum[1];
   }
-  for (i; i < expression.length; i++){
+  for (i; i < expression.length; i++){ // Wish I was smart enough to implement an LR1
     // If operator after string start, read the number before the operator
     if (OPERATORS.test((expression[i]))){
       parsedExpression.push(expression[i]);
@@ -132,6 +129,7 @@ function parseExpression(expression){
   return parsedExpression;
 }
 
+// Get rid of unecessary brackets outside an expression string
 function stripOuterBrackets(expr){
   exprArr = [...expr];
   let j;
@@ -145,6 +143,7 @@ function stripOuterBrackets(expr){
   return exprArr.join('');
 }
 
+// Read a number from an expression string
 function readNumber(string, startIndex){
   let result = []
   let end = /[\-+]/.test(string[startIndex]) ? startIndex+1: startIndex;
@@ -155,6 +154,7 @@ function readNumber(string, startIndex){
   return result;
 }
 
+// Save me from the unicode I used to make the calculator look nice
 function replaceSymbols(expression){
   expression = expression.replaceAll(/\s/g, "");
   expression = expression.replaceAll('\u00f7', '/');
@@ -162,6 +162,7 @@ function replaceSymbols(expression){
   return expression;
 }
 
+// Validate the input received by the calculator
 function checkInput(expression) {
 try {
 const ILLEGAL_CHARACTERS = /[^\d\(\)+\-*/.%]/;
@@ -169,7 +170,7 @@ const IMPROPER_OPERATOR_USE = /([%/*]{2,})|(^[/*%])|([+\-*/.%]$)|([+-][*/])/;
 if(!/\d/.test(expression)) throw "Syntax Error";
 if (ILLEGAL_CHARACTERS.test(expression)) throw "Syntax Error";
 if (IMPROPER_OPERATOR_USE.test(expression)) throw "Syntax Error";
-if (!validParentheses(expression)) throw "Syntax Error";
+if (!validBrackets(expression)) throw "Syntax Error";
 return "Valid";
 }
 catch (error) {
@@ -177,7 +178,8 @@ catch (error) {
 }
 }
 
-function validParentheses(expression){
+// A simple pushdown automaton which checks if the brackets entered are balanced out
+function validBrackets(expression){
 let stack = [];
 for(let i = 0; i < expression.length; i++){
   if (expression[i] == '(') {
@@ -189,8 +191,22 @@ for(let i = 0; i < expression.length; i++){
 }
 return stack.length == 0;
 }
+
+/* The core functionality of the calculator */
+// Program entry point
+function calculate(expression){
+  if (expression == "") return "";
+  // Format and check input
+  expression = replaceSymbols(expression);
+  let inputValid = checkInput(expression);
+  if (inputValid != "Valid") return inputValid;
+  expression = parseExpression(expression);
+  return evaluate(expression); // Implement this
+}
+
+// Collapses an expression array into its result using BODMAS
 function evaluate(expr){
-  const OPERATOR_ORDER = ['*', '/', '%', '+', '-'];
+  const OPERATOR_ORDER = ['/', '*', '%', '+', '-'];
   let i;
   let result;
   console.log(expr);
@@ -215,8 +231,9 @@ function evaluate(expr){
   return expr.length == 1 ? expr[0] : "Math Error";
 }
 
+// Calls one of the arithmetic helpers based on an operator
 function operate(operator, a, b){
-  switch (operator){
+  switch (operator){ // Open-Closed principle, I am sorry...
     case ('*'):
       return multiply(a, b);
     case ('/'):
