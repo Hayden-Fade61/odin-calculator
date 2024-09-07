@@ -10,8 +10,8 @@ const SYMBOLS = [
 ];
 const SIZE = SYMBOLS.length;
 const OPERATORS = /[-+*\/%]/;
-let previous;
-let answer; 
+let answer = 0; 
+resultDisplayed = false;
 
 /* Calculator UI script */
 document.addEventListener("DOMContentLoaded", () => {createCalculator()}) // This event fires when page is done loading
@@ -58,15 +58,14 @@ function addEvents(){
       case ('='):
         button.addEventListener("click", () => {
           input = document.querySelector("#current-input");
-          previous = answer;
-          answer = calculate(input.textContent); 
-          display(answer);
+          answer = calculate(input.textContent);
+          displayResult(answer);
         });
         break;
       // Every other button
         default:
         button.addEventListener("click", () => {
-          display(button.textContent);
+          displayInput(button.textContent);
         });
         break;
     }
@@ -74,10 +73,23 @@ function addEvents(){
 }
 
 // Show a string on the output display 
-function display(text){
+function displayInput(text){
   const inputDisplay = document.querySelector("#current-input");
   const prevDisplay = document.querySelector("#previous-input");
+  if (resultDisplayed){
+    prevDisplay.textContent = isNaN(answer) ? "" : "Ans = " + answer;
+    resultDisplayed = false;
+    inputDisplay.textContent = "";
+  }
   inputDisplay.textContent += text;
+}
+
+function displayResult(result){
+  const inputDisplay = document.querySelector("#current-input");
+  const prevDisplay = document.querySelector("#previous-input");
+  prevDisplay.textContent = inputDisplay.textContent;
+  inputDisplay.textContent = result;
+  resultDisplayed = true;
 }
 
 /* Input parsing for calculator handled here */
